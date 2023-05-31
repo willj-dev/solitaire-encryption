@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Deck (
-    Suit(..), Rank(..), Card(..), Deck, orderedDeck, cardValue,
-    moveCard, insertCardAt, jokersTripleCut, countCut, countCard
+    Suit(..), Rank(..), Card(..), Deck, orderedDeck, cardValue, isJoker,
+    moveCard, insertCardAt, jokersTripleCut, countCut, countCard, cardValue',
+    countCut', jokers, suit
 ) where
 
 data Suit = Club | Diamond | Heart | Spade deriving (Eq, Ord)
@@ -12,6 +13,12 @@ instance Show Suit where
     show Diamond    = "♦"
     show Heart      = "♥"
     show Spade      = "♠"
+
+suit :: Suit -> Deck
+suit s = Card s <$> ranks
+
+suits :: [Suit]
+suits = [Club, Diamond, Heart, Spade]
 
 data Rank = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King deriving (Eq, Ord)
 
@@ -30,35 +37,38 @@ instance Show Rank where
     show Queen  = "Q"
     show King   = "K"
 
+ranks :: [Rank]
+ranks = [Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King]
+
 data Card = Card Suit Rank | JokerA | JokerB deriving (Eq, Ord)
-
-isJoker :: Card -> Bool
-isJoker (Card _ _) = False
-isJoker _ = True
-
-type Deck = [Card]
 
 instance Show Card where
     show (Card s r) = show r ++ show s
     show JokerA     = "JokerA"
     show JokerB     = "JokerB"
 
+type Deck = [Card]
+
+jokers :: Deck
+jokers = [JokerA, JokerB]
+
+isJoker :: Card -> Bool
+isJoker (Card _ _) = False
+isJoker _ = True
+
 orderedDeck :: Deck
-orderedDeck = foldr addSuit [JokerA, JokerB] suits
-    where
-        addSuit suit deck = suitCards suit ++ deck
-        suitCards suit = Card suit <$> ranks
-
-suits :: [Suit]
-suits = [Club, Diamond, Heart, Spade]
-
-ranks :: [Rank]
-ranks = [Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King]
+orderedDeck = foldr (\s d -> suit s ++ d) jokers suits
 
 cardValue :: Card -> Int
 cardValue (Card s r)    = suitValue s + rankValue r
 cardValue JokerA        = 53
 cardValue JokerB        = 53 -- both jokers have the same value
+
+-- Clubs/Hearts are 1--13, Spades/Diamonds are 14--26
+cardValue' :: Card -> Int
+cardValue' (Card Heart r) = cardValue (Card Club r)
+cardValue' (Card Spade r) = cardValue (Card Diamond r)
+cardValue' c = cardValue c
 
 suitValue :: Suit -> Int
 suitValue Club      = 0
@@ -117,6 +127,10 @@ jokersTripleCut d = let
 countCut :: Deck -> Deck
 countCut d = let
     i = cardValue (last d)
+    in countCut' i d
+
+countCut' :: Int -> Deck -> Deck
+countCut' i d = let
     (l, r) = splitAt i d
     in init r ++ l ++ [last r]
 

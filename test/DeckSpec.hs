@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 module DeckSpec (main, spec) where
 
 import Test.Hspec
@@ -17,38 +19,30 @@ spec = do
       cardValue <$> orderedDeck `shouldBe` [1 .. 53] ++ [53]
 
   describe "moveCard" $ do
-    it "correctly moves a card down" $ do
-      moveCard (spade Two) 2 spadesOneThroughFive
-        `shouldBe` spades [Ace, Three, Four, Two, Five]
-    it "correctly wraps a card around" $ do
-      moveCard (spade Four) 2 spadesOneThroughFive
-        `shouldBe` spades [Ace, Four, Two, Three, Five]
+    it "correctly moves a card down" $ moveCard (spade Two) 2 spadesOneThroughFive
+      `shouldBe` spades [Ace, Three, Four, Two, Five]
+    it "correctly wraps a card around" $ moveCard (spade Four) 2 spadesOneThroughFive
+      `shouldBe` spades [Ace, Four, Two, Three, Five]
 
   describe "jokersTripleCut" $ do
-    it "should do a triple cut" $ do
-      jokersTripleCut (insertJokers (spades [Ace, Two]) (spades [Three, Four]) (spades [Five, Six]))
-        `shouldBe` (insertJokers (spades [Five, Six]) (spades [Three, Four]) (spades [Ace, Two]))
-    it "should not depend on joker order" $ do
-      jokersTripleCut (insertJokers' (spades [Ace, Two]) (spades [Three, Four]) (spades [Five, Six]))
-        `shouldBe` (insertJokers' (spades [Five, Six]) (spades [Three, Four]) (spades [Ace, Two]))
-    it "should handle empty left" $ do
-      jokersTripleCut (insertJokers [] (spades [Three, Four]) (spades [Five, Six]))
-        `shouldBe` (insertJokers (spades [Five, Six]) (spades [Three, Four]) [])
-    it "should handle empty right" $ do
-      jokersTripleCut (insertJokers (spades [Ace, Two]) (spades [Three, Four]) [])
-        `shouldBe` (insertJokers [] (spades [Three, Four]) (spades [Ace, Two]))
-    it "should handle empty middle" $ do
-      jokersTripleCut (insertJokers (spades [Ace, Two]) [] (spades [Five, Six]))
-        `shouldBe` (insertJokers (spades [Five, Six]) [] (spades [Ace, Two]))
-    it "should handle empty ends" $ do
-      jokersTripleCut (insertJokers [] (spades [Three, Four]) [])
-        `shouldBe` (insertJokers [] (spades [Three, Four]) [])
+    it "should do a triple cut" $ jokersTripleCut (insertJokers (spades [Ace, Two]) (spades [Three, Four]) (spades [Five, Six]))
+      `shouldBe` insertJokers (spades [Five, Six]) (spades [Three, Four]) (spades [Ace, Two])
+    it "should not depend on joker order" $ jokersTripleCut (insertJokers' (spades [Ace, Two]) (spades [Three, Four]) (spades [Five, Six]))
+      `shouldBe` insertJokers' (spades [Five, Six]) (spades [Three, Four]) (spades [Ace, Two])
+    it "should handle empty left" $ jokersTripleCut (insertJokers [] (spades [Three, Four]) (spades [Five, Six]))
+      `shouldBe` insertJokers (spades [Five, Six]) (spades [Three, Four]) []
+    it "should handle empty right" $ jokersTripleCut (insertJokers (spades [Ace, Two]) (spades [Three, Four]) [])
+      `shouldBe` insertJokers [] (spades [Three, Four]) (spades [Ace, Two])
+    it "should handle empty middle" $ jokersTripleCut (insertJokers (spades [Ace, Two]) [] (spades [Five, Six]))
+      `shouldBe` insertJokers (spades [Five, Six]) [] (spades [Ace, Two])
+    it "should handle empty ends" $ jokersTripleCut (insertJokers [] (spades [Three, Four]) [])
+      `shouldBe` insertJokers [] (spades [Three, Four]) []
 
   describe "countCut" $ do
     it "should do the thing" $ do
       countCut (clubs [Four, Five, Ace, Two, Three]) `shouldBe` clubs [Two, Four, Five, Ace, Three]
 
-  describe "coundCard" $ do
+  describe "countCard" $ do
     it "should work" $ do
       countCard (clubs [Four, Five, Ace, Two, Three]) `shouldBe` Card Club Two
 
